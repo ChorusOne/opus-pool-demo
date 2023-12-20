@@ -1,0 +1,120 @@
+#root {
+    width: 100vw;
+    height: 100vh;
+    margin: 0 auto;
+    text-align: center;
+    border: 1px solid #ccc;
+    position: relative;
+    overflow: hidden;
+    padding-top: 5rem;
+}
+
+.button-container {
+    display: flex;
+    gap: 1rem;
+}
+.tabs {
+    margin-top: 1rem;
+}
+
+.tab-headers {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-header {
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-right: 4px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+    color: #0e6c78;
+}
+
+.tab-header:hover {
+    background-color: #e9e9e9;
+}
+
+.tab-header.active {
+    background-color: #fff;
+    border-color: #168f9c;
+    font-weight: bolder;
+}
+
+.tab-content {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-top: none;
+    height: max-content;
+}
+
+@media (prefers-color-scheme: dark) {
+    .tab-header {
+        background-color: #2a2a2a;
+        color: #ffffff;
+        border: 1px solid #444444;
+    }
+
+    .tab-content {
+        background-color: #222222;
+        color: #dddddd;
+        border: 1px solid #444444;
+    }
+
+    .tab-header:hover {
+        background-color: #3a3a3a;
+    }
+
+    .tab-header.active {
+        background-color: #4a4a4a;
+        border-color: white;
+    }
+}
+
+.error {
+    color: #fc655b;
+    font-size: small;
+    margin-top: 0.5rem;
+}
+
+.success-toast {
+    position: relative;
+    background-color: white;
+    padding: 1rem;
+    border: #0e6c78;
+    font-size: 0.9rem;
+}
+.toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 1rem 0 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.success-toast button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.5rem;
+    color: #168f9c;
+    transition: color 0.3s;
+    outline: none;
+}
+
+.success-toast button:focus,
+.success-toast button:hover {
+    outline: none;
+}
+.success-toast a {
+    color: #168f9c;
+    text-decoration: none;
+    transition: color 0.3s;
+}
