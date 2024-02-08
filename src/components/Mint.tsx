@@ -1,11 +1,12 @@
 import React from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
-import { FormComponent } from './FormComponent';
 import { useStakeMutation } from '../hooks/useStakeMutation';
 import { useState } from 'react';
 import { parseEther } from 'viem';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
 import { useVaultDetails } from '../hooks/useVaultDetails';
+import { useHealthQuery } from '../hooks/useHealthQuery';
+import { MintForm } from './MintForm';
 
 export const MintComponent = () => {
     const { address } = useAccount();
@@ -20,6 +21,16 @@ export const MintComponent = () => {
     const { mutate: mint, isError, isLoading, isSuccess } = useStakeMutation();
 
     const { data: walletClient } = useWalletClient();
+
+    const { data: healthForVault } = useHealthQuery({
+        enabled: true,
+        userAddress: address,
+        vaultAddress: vaultForChain,
+        amountToMint: amount,
+        network: networkType,
+        vaultData: vaultDetails,
+    });
+    console.log('healthForVault', healthForVault);
 
     const handleMint = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -36,16 +47,14 @@ export const MintComponent = () => {
 
     return (
         <>
-            <FormComponent
-                title="Mint"
-                availableLabel="Available to mint"
+            <MintForm
                 onSubmit={(e) => handleMint(e)}
                 maxAmount={vaultDetails?.maxMint}
                 setAmount={setAmount}
                 isError={isError}
                 isLoading={isLoading}
                 isSuccess={isSuccess}
-                btnLabel="Mint osETH"
+                healthForVault={healthForVault}
             />
         </>
     );

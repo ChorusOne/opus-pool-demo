@@ -4,27 +4,29 @@ import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
 import { number } from 'yup';
 import { useAccount } from 'wagmi';
 import toast, { LoaderIcon } from 'react-hot-toast';
+import { OsTokenPositionHealth } from '@chorus-one/opus-pool';
 
-export const FormComponent = ({
-    title,
-    availableLabel,
+export const MintForm = ({
     onSubmit,
     maxAmount,
     setAmount,
     isError,
     isLoading,
     isSuccess,
-    btnLabel,
+    healthForVault,
 }: {
-    title: string;
-    availableLabel: string;
     onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
     maxAmount: bigint | undefined;
     setAmount: React.Dispatch<React.SetStateAction<bigint>>;
     isError: boolean;
     isLoading: boolean;
     isSuccess: boolean;
-    btnLabel: string;
+    healthForVault:
+        | {
+              initialHealth: OsTokenPositionHealth;
+              updatedHealth: OsTokenPositionHealth;
+          }
+        | undefined;
 }) => {
     const [inputValue, setInputValue] = useState<string>('');
     const { wrongNetwork } = useNetworkAndVaultContext();
@@ -66,8 +68,27 @@ export const FormComponent = ({
     };
 
     return (
-        <div style={{ padding: '1rem', border: '1px' }}>
-            <h2>{title}</h2>
+        <div style={{ padding: '1rem', border: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h2>Mint osETH</h2>
+            {healthForVault ? (
+                <>
+                    <h3>Position health</h3>
+                    <div
+                        style={{
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            gap: '20px',
+                            border: '1px solid lightGrey',
+                            borderRadius: '10px',
+                            padding: '10px',
+                        }}
+                    >
+                        <span>{healthForVault?.initialHealth}</span>
+                        <span className="mx-2">&rarr;</span>
+                        <span>{healthForVault?.updatedHealth}</span>
+                    </div>
+                </>
+            ) : null}
             <form
                 onSubmit={(e) => {
                     onSubmit(e);
@@ -109,12 +130,22 @@ export const FormComponent = ({
                         marginBottom: '0.5rem',
                     }}
                 >
-                    <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>{availableLabel}:</div>
+                    <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>Available to mint:</div>
                     <div style={{ fontSize: '0.8rem', color: '#168F9C', fontWeight: 'bold' }}>
                         {maxAmount ? Number(formatEther(maxAmount)).toLocaleString('US-EN') : '0'} ETH
                     </div>
                 </div>
-                <button disabled={!isConnected || isLoading || !inputValue || wrongNetwork} type="submit">
+                <button
+                    disabled={
+                        !isConnected ||
+                        isLoading ||
+                        !inputValue ||
+                        wrongNetwork ||
+                        healthForVault?.initialHealth !== OsTokenPositionHealth.Healthy ||
+                        healthForVault?.updatedHealth !== OsTokenPositionHealth.Healthy
+                    }
+                    type="submit"
+                >
                     {isConnected ? (
                         isLoading ? (
                             <div
@@ -128,7 +159,7 @@ export const FormComponent = ({
                                 <span>Waiting for confirmation</span>
                             </div>
                         ) : (
-                            btnLabel
+                            'Mint osETH'
                         )
                     ) : (
                         'Connect wallet to stake'
