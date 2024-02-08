@@ -1,7 +1,7 @@
 // import { useAccount } from 'wagmi';
 import { useState } from 'react';
 import { FormComponent } from './FormComponent';
-import { formatEther, parseEther } from 'viem/utils';
+import { parseEther } from 'viem/utils';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
 import { useAccount, useWalletClient } from 'wagmi';
 import { useVaultDetails } from '../hooks/useVaultDetails';
@@ -22,7 +22,7 @@ export const UnstakeComponent = () => {
 
     const handleUnstake = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (!address || !vaultForChain || vaultData?.length === 0) return;
+        if (!address || !vaultForChain) return;
         unstake({
             userAddress: address,
             network: networkType,
@@ -38,7 +38,7 @@ export const UnstakeComponent = () => {
             title="Unstake"
             availableLabel="Available to unstake"
             onSubmit={handleUnstake}
-            balance={vaultData ? formatEther(vaultData[0].balance, 'wei') : '0'}
+            maxAmount={vaultData?.maxWithdraw}
             setAmount={setAmount}
             isError={isError}
             isLoading={isLoading}
