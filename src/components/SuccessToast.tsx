@@ -1,9 +1,9 @@
 import toast, { Toast } from 'react-hot-toast';
 import { explorerUrlsMap } from '../utils/constants';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
-import { StakingTypeEnum } from '@chorus-one/opus-pool';
+import { TransactionType } from '../utils/types';
 
-export const SuccessToast = ({ type, hash, t }: { type: StakingTypeEnum; hash: string; t: Toast }) => {
+export const SuccessToast = ({ type, hash, t }: { type: TransactionType; hash: string; t: Toast }) => {
     const { networkType } = useNetworkAndVaultContext();
     const txLink = explorerUrlsMap.get(networkType);
     return (
@@ -34,7 +34,7 @@ export const SuccessToast = ({ type, hash, t }: { type: StakingTypeEnum; hash: s
     );
 };
 
-export const showSuccessToast = (data: string, txType: StakingTypeEnum) => {
+export const showSuccessToast = (data: string, txType: TransactionType) => {
     toast.success(
         (t) => {
             return <SuccessToast hash={data} t={t} type={txType} />;

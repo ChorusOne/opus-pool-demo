@@ -6,7 +6,7 @@ import { VaultDetails } from '@chorus-one/opus-pool';
 
 export const VaultDetailsComponent = () => {
     const { address } = useAccount();
-    const { selectedVaultDetails, networkType } = useNetworkAndVaultContext();
+    const { vaultForChain, networkType } = useNetworkAndVaultContext();
 
     const {
         data: vaultData,
@@ -14,7 +14,7 @@ export const VaultDetailsComponent = () => {
         isLoading,
     } = useVaultDetails({
         address,
-        vault: selectedVaultDetails,
+        vault: vaultForChain,
         network: networkType,
     });
 

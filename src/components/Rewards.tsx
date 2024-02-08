@@ -10,7 +10,7 @@ export type ChartDataPoint = {
 
 export const RewardsComponent = () => {
     const { address } = useAccount();
-    const { selectedVaultDetails, networkType } = useNetworkAndVaultContext();
+    const { vaultForChain, networkType } = useNetworkAndVaultContext();
 
     const from = new Date();
     from.setMonth(from.getMonth() - 1);
@@ -23,7 +23,7 @@ export const RewardsComponent = () => {
     } = useRewards({
         address,
         network: networkType,
-        vault: selectedVaultDetails!,
+        vault: vaultForChain!,
         from,
         to, // today
     });

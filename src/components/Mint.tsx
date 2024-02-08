@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { parseEther } from 'viem';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
 
-export const StakeComponent = () => {
+export const MintComponent = () => {
     const { address } = useAccount();
     const { data: balance } = useBalance({
         address,
@@ -14,14 +14,14 @@ export const StakeComponent = () => {
     const [amount, setAmount] = useState<bigint>(parseEther('0'));
     const { networkType, vaultForChain } = useNetworkAndVaultContext();
 
-    const { mutate: stake, isError, isLoading, isSuccess } = useStakeMutation();
+    const { mutate: mint, isError, isLoading, isSuccess } = useStakeMutation();
 
     const { data: walletClient } = useWalletClient();
 
-    const handleStake = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleMint = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!address || !vaultForChain) return;
-        stake({
+        mint({
             userAddress: address,
             network: networkType,
             vault: vaultForChain,
@@ -36,7 +36,7 @@ export const StakeComponent = () => {
             <FormComponent
                 title="Stake"
                 availableLabel="Available to stake"
-                onSubmit={(e) => handleStake(e)}
+                onSubmit={(e) => handleMint(e)}
                 balance={balance?.formatted}
                 setAmount={setAmount}
                 isError={isError}

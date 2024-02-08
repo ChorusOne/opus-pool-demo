@@ -7,7 +7,7 @@ import { Networks, VaultTransaction } from '@chorus-one/opus-pool';
 
 export const TransactionsComponent = () => {
     const { address } = useAccount();
-    const { networkType, selectedVaultDetails } = useNetworkAndVaultContext();
+    const { networkType, vaultForChain } = useNetworkAndVaultContext();
     const {
         data: transactions,
         isError,
@@ -15,7 +15,7 @@ export const TransactionsComponent = () => {
     } = useTransactionHistory({
         address,
         network: networkType,
-        vaults: selectedVaultDetails,
+        vaults: vaultForChain,
     });
 
     return (

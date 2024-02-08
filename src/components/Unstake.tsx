@@ -10,10 +10,10 @@ import { useUnstakeMutation } from '../hooks/useUnstakeMutation';
 export const UnstakeComponent = () => {
     const [amount, setAmount] = useState<bigint>(parseEther('0'));
     const { address } = useAccount();
-    const { selectedVaultDetails, networkType } = useNetworkAndVaultContext();
+    const { vaultForChain, networkType } = useNetworkAndVaultContext();
     const { data: vaultData } = useVaultDetails({
         address,
-        vault: selectedVaultDetails,
+        vault: vaultForChain,
         network: networkType,
     });
 
@@ -22,11 +22,11 @@ export const UnstakeComponent = () => {
 
     const handleUnstake = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (!address || !selectedVaultDetails || vaultData?.length === 0) return;
+        if (!address || !vaultForChain || vaultData?.length === 0) return;
         unstake({
             userAddress: address,
             network: networkType,
-            vault: selectedVaultDetails,
+            vault: vaultForChain,
             amount,
             walletClient,
         });

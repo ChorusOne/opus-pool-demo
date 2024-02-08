@@ -3,7 +3,7 @@ import { useWalletClient } from 'wagmi';
 import toast from 'react-hot-toast';
 import { Hex } from 'viem';
 import { showSuccessToast } from '../components/SuccessToast';
-import { Networks, OpusPool, StakingTypeEnum } from '@chorus-one/opus-pool';
+import { Networks, OpusPool } from '@chorus-one/opus-pool';
 
 export const useStakeMutation = () => {
     return useMutation({
@@ -21,7 +21,7 @@ export const useStakeMutation = () => {
             amount: bigint;
             walletClient: ReturnType<typeof useWalletClient>['data'];
         }) => stake({ userAddress, network, vault, amount, walletClient }),
-        onSuccess: (data) => showSuccessToast(data, StakingTypeEnum.Stake),
+        onSuccess: (data) => showSuccessToast(data, 'Stake'),
         onError: (error: unknown) => {
             let errorMessage: string;
             if (error instanceof Error) {

@@ -43,6 +43,8 @@ const getTxHistory = async ({
     const txData: VaultTransaction[] = [];
     try {
         const res: VaultTransaction[] = await pool.getTransactionsHistory(requestedVaults);
+        console.log('res', res);
+
         if (res.length > 0) {
             res.forEach((tx) => {
                 txData.push(tx);
