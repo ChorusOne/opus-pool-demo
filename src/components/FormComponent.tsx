@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { formatUnits, parseEther } from 'viem';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { formatEther, parseEther } from 'viem';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
-import { ValidationError, number } from 'yup';
+import { number } from 'yup';
 import { useAccount } from 'wagmi';
 import toast, { LoaderIcon } from 'react-hot-toast';
 
@@ -9,7 +9,7 @@ export const FormComponent = ({
     title,
     availableLabel,
     onSubmit,
-    balance,
+    maxAmount,
     setAmount,
     isError,
     isLoading,
@@ -19,24 +19,18 @@ export const FormComponent = ({
     title: string;
     availableLabel: string;
     onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
-    balance: string | undefined;
+    maxAmount: bigint | undefined;
     setAmount: React.Dispatch<React.SetStateAction<bigint>>;
     isError: boolean;
     isLoading: boolean;
     isSuccess: boolean;
     btnLabel: string;
 }) => {
-    const [error, setError] = useState<string | null>(null);
     const [inputValue, setInputValue] = useState<string>('');
     const { wrongNetwork } = useNetworkAndVaultContext();
     const { isConnected } = useAccount();
 
-    const numberSchema = number()
-        .required()
-        .positive('Amount must be greater than 0')
-        .min(parseFloat(formatUnits(1n, 9)), 'Amount must be greater than 1 Gwei')
-        .max(parseFloat(balance || '0'), `Amount must be less than ${balance} ETH`)
-        .transform((value) => (isNaN(value) || value === null || value === undefined ? 0 : value));
+    console.log('amount', maxAmount);
 
     useEffect(() => {
         if (isError) {
@@ -48,6 +42,31 @@ export const FormComponent = ({
             setInputValue('');
         }
     }, [isSuccess]);
+
+    const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const regex = /^\d*(\.\d{0,18})?$/; // only allow 18 digits after the decimal
+        const stringValue = e.target.value.replaceAll('+', '').replaceAll('-', '');
+        let isValid = false;
+        let validValue: bigint | undefined;
+        if (stringValue !== '' && !regex.test(stringValue)) {
+            return;
+        }
+        try {
+            if (stringValue === '') {
+                validValue = undefined;
+            } else {
+                number().validateSync(stringValue);
+                validValue = parseEther(stringValue);
+                setAmount(validValue);
+            }
+            isValid = true;
+        } catch (_error) {
+            // Swallow parsing errors, just don't update the value
+        }
+        if (!isValid) return;
+        setInputValue(stringValue);
+    };
+
     return (
         <div style={{ padding: '1rem', border: '1px' }}>
             <h2>{title}</h2>
@@ -75,39 +94,13 @@ export const FormComponent = ({
                         }}
                         type="text"
                         placeholder="ETH amount"
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setInputValue(value);
-                            try {
-                                numberSchema.validateSync(value);
-                                setError(null);
-                                if (value) {
-                                    const amount = parseEther(value);
-                                    setAmount(amount);
-                                }
-                            } catch (error) {
-                                if (error instanceof ValidationError) {
-                                    setError(error.message);
-                                }
-                            }
-                        }}
+                        onChange={onChange}
                         value={inputValue}
                         disabled={!isConnected || isLoading || wrongNetwork}
                         title={!isConnected ? 'Connect wallet' : 'Enter the amount to stake'}
                     />
                     <span>ETH</span>
                 </div>
-                {error ? (
-                    <div
-                        className="error"
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'flex-start',
-                        }}
-                    >
-                        {error}
-                    </div>
-                ) : null}
                 <div
                     style={{
                         width: '100%',
@@ -119,9 +112,11 @@ export const FormComponent = ({
                     }}
                 >
                     <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>{availableLabel}:</div>
-                    <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>{balance ? balance : '0'} ETH</div>
+                    <div style={{ fontSize: '0.8rem', color: '#168F9C', fontWeight: 'bold' }}>
+                        {maxAmount ? Number(formatEther(maxAmount)).toLocaleString('US-EN') : '0'} ETH
+                    </div>
                 </div>
-                <button disabled={!isConnected || isLoading || !!error || !inputValue || wrongNetwork} type="submit">
+                <button disabled={!isConnected || isLoading || !inputValue || wrongNetwork} type="submit">
                     {isConnected ? (
                         isLoading ? (
                             <div

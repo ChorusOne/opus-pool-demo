@@ -37,7 +37,7 @@ export const StakeComponent = () => {
                 title="Stake"
                 availableLabel="Available to stake"
                 onSubmit={(e) => handleStake(e)}
-                balance={balance?.formatted}
+                maxAmount={balance?.value}
                 setAmount={setAmount}
                 isError={isError}
                 isLoading={isLoading}
