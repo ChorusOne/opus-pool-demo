@@ -4,12 +4,15 @@ import { RewardsComponent } from './Rewards';
 import { TransactionsComponent } from './Transactions';
 import { UnstakeComponent } from './Unstake';
 import { VaultDetailsComponent } from './Vault';
+import { MintComponent } from './Mint';
 
 enum TabsEnum {
     Transactions = 'Transactions',
     Stake = 'Stake',
     Unstake = 'Unstake',
     Rewards = 'Rewards',
+    Mint = 'Mint',
+    Burn = 'Burn',
 }
 
 export const Tabs = () => {
@@ -24,6 +27,18 @@ export const Tabs = () => {
                     Stake
                 </div>
                 <div
+                    className={`tab-header ${activeTab === TabsEnum.Mint ? 'active' : ''}`}
+                    onClick={() => setActiveTab(TabsEnum.Mint)}
+                >
+                    Mint
+                </div>
+                <div
+                    className={`tab-header ${activeTab === TabsEnum.Unstake ? 'active' : ''}`}
+                    onClick={() => setActiveTab(TabsEnum.Unstake)}
+                >
+                    Unstake
+                </div>
+                <div
                     className={`tab-header ${activeTab === TabsEnum.Rewards ? 'active' : ''}`}
                     onClick={() => setActiveTab(TabsEnum.Rewards)}
                 >
@@ -34,12 +49,6 @@ export const Tabs = () => {
                     onClick={() => setActiveTab(TabsEnum.Transactions)}
                 >
                     Transactions
-                </div>
-                <div
-                    className={`tab-header ${activeTab === TabsEnum.Unstake ? 'active' : ''}`}
-                    onClick={() => setActiveTab(TabsEnum.Unstake)}
-                >
-                    Unstake
                 </div>
             </div>
             <div className="tab-content">
@@ -55,6 +64,12 @@ export const Tabs = () => {
                     <>
                         <VaultDetailsComponent />
                         <UnstakeComponent />
+                    </>
+                )}
+                {activeTab === TabsEnum.Mint && (
+                    <>
+                        <VaultDetailsComponent />
+                        <MintComponent />
                     </>
                 )}
             </div>
