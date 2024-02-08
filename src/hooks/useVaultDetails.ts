@@ -1,6 +1,21 @@
-import { Networks, OpusPool, VaultDetails } from '@chorus-one/opus-pool';
+import { Networks, OpusPool } from '@chorus-one/opus-pool';
 import { useQuery } from '@tanstack/react-query';
-import { Hex } from 'viem';
+import { Hex, formatEther } from 'viem';
+
+export interface VaultData {
+    stake: {
+        assets: bigint;
+        shares: bigint;
+    };
+    minted: bigint;
+    maxMint: bigint;
+    maxWithdraw: bigint;
+    apr: number;
+    tvl: string;
+    address: Hex;
+    name: string;
+    description: string;
+}
 
 export const useVaultDetails = ({
     network,
@@ -13,7 +28,7 @@ export const useVaultDetails = ({
 }) => {
     return useQuery({
         queryKey: ['vaultDetails', vault],
-        queryFn: () => getVaultDetails({ address, network, vaults: vault && [vault] }),
+        queryFn: () => getVaultDetails({ address, network, vault }),
         enabled: !!address && !!network && !!vault,
     });
 };
@@ -21,20 +36,38 @@ export const useVaultDetails = ({
 const getVaultDetails = async ({
     address,
     network,
-    vaults,
+    vault,
 }: {
     address: Hex | undefined;
     network: Networks;
-    vaults: Hex[] | undefined;
-}): Promise<VaultDetails[]> => {
-    if (!address || !network || !vaults) {
-        return [];
+    vault: Hex | undefined;
+}) => {
+    if (!address || !network || !vault) {
+        return undefined;
     }
     const pool = new OpusPool({
         address,
         network,
     });
-    const res = await pool.getVaultDetails(vaults);
+    const [{ minted }, maxMint, maxWithdraw, stake, [vaultDetails]] = await Promise.all([
+        pool.getOsTokenPositionForVault(vault),
+        pool.getMaxMintForVault(vault),
+        pool.getMaxUnstakeForUserForVault(vault),
+        pool.getStakeBalanceForUser(vault),
+        pool.getVaultDetails([vault]),
+    ]);
 
-    return res;
+    const result: VaultData = {
+        stake,
+        minted: minted.shares - minted.fee,
+        maxMint,
+        maxWithdraw,
+        apr: Number(vaultDetails.apy),
+        tvl: formatEther(vaultDetails.tvl),
+        address: vault,
+        name: vaultDetails.name,
+        description: vaultDetails.description,
+    };
+
+    return result;
 };
