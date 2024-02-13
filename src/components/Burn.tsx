@@ -1,27 +1,30 @@
 import React from 'react';
-import { useAccount, useBalance, useWalletClient } from 'wagmi';
-import { FormComponent } from './FormComponent';
-import { useStakeMutation } from '../hooks/useStakeMutation';
+import { useAccount, useWalletClient } from 'wagmi';
 import { useState } from 'react';
 import { parseEther } from 'viem';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
+import { useVaultDetails } from '../hooks/useVaultDetails';
+import { BurnForm } from './BurnForm';
+import { useBurnMutation } from '../hooks/useBurnMutation';
 
-export const StakeComponent = () => {
+export const BurnComponent = () => {
     const { address } = useAccount();
-    const { data: balance } = useBalance({
-        address,
-    });
     const [amount, setAmount] = useState<bigint>(parseEther('0'));
     const { networkType, vaultForChain } = useNetworkAndVaultContext();
 
-    const { mutate: stake, isError, isLoading, isSuccess } = useStakeMutation();
+    const { data: vaultDetails } = useVaultDetails({
+        network: networkType,
+        vault: vaultForChain,
+        address: address,
+    });
+    const { mutate: burn, isError, isLoading, isSuccess } = useBurnMutation();
 
     const { data: walletClient } = useWalletClient();
 
-    const handleStake = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleBurn = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!address || !vaultForChain) return;
-        stake({
+        burn({
             userAddress: address,
             network: networkType,
             vault: vaultForChain,
@@ -33,16 +36,13 @@ export const StakeComponent = () => {
 
     return (
         <>
-            <FormComponent
-                title="Stake"
-                availableLabel="Available to stake"
-                onSubmit={(e) => handleStake(e)}
-                maxAmount={balance?.value}
+            <BurnForm
+                onSubmit={(e) => handleBurn(e)}
+                maxAmount={vaultDetails?.minted}
                 setAmount={setAmount}
                 isError={isError}
                 isLoading={isLoading}
                 isSuccess={isSuccess}
-                btnLabel="Stake"
             />
         </>
     );

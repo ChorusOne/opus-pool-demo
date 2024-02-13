@@ -9,7 +9,7 @@ import { Networks, getDefaultVaults } from '@chorus-one/opus-pool';
  * @returns null
  */
 export default function VaultDetailsUpdater() {
-    const { networkType, setAllVaultsForChain, setNetworkType, setSelectedVaultDetails } = useNetworkAndVaultContext();
+    const { networkType, setVaultForChain, setNetworkType } = useNetworkAndVaultContext();
     const { chain } = useNetwork();
     const { address } = useAccount();
 
@@ -31,10 +31,9 @@ export default function VaultDetailsUpdater() {
 
         // Set vault details if available
         if (defaultVaults) {
-            setAllVaultsForChain(defaultVaults);
-            setSelectedVaultDetails(defaultVaults[0]);
+            setVaultForChain(defaultVaults[1]);
         }
-    }, [chain, address, networkType, setAllVaultsForChain, setSelectedVaultDetails, setNetworkType]);
+    }, [chain, address, networkType, setVaultForChain, setNetworkType]);
 
     return null;
 }

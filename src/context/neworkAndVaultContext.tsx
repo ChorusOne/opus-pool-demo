@@ -7,10 +7,8 @@ type networkContextType = {
     setNetworkType: (value: Networks) => void;
     wrongNetwork: boolean;
     setWrongNetwork: (value: boolean) => void;
-    allVaultsForChain: Hex[] | undefined;
-    setAllVaultsForChain: (value: Hex[]) => void;
-    selectedVaultDetails: Hex | undefined;
-    setSelectedVaultDetails: (value: Hex) => void;
+    vaultForChain: Hex | undefined;
+    setVaultForChain: (value: Hex | undefined) => void;
 };
 
 type Props = {
@@ -24,10 +22,8 @@ const networkContexDefault: networkContextType = {
     wrongNetwork: false,
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     setWrongNetwork: () => {},
-    allVaultsForChain: undefined,
-    setAllVaultsForChain: () => [],
-    selectedVaultDetails: undefined,
-    setSelectedVaultDetails: () => [],
+    vaultForChain: undefined,
+    setVaultForChain: () => [],
 };
 
 const NetworkContext = createContext<networkContextType>(networkContexDefault);
@@ -39,18 +35,15 @@ const useNetworkAndVaultContext = () => {
 function NetworkProvider({ children }: Props) {
     const [networkType, setNetworkType] = React.useState<Networks>(Networks.Holesky);
     const [wrongNetwork, setWrongNetwork] = React.useState<boolean>(false);
-    const [allVaultsForChain, setAllVaultsForChain] = React.useState<Hex[] | undefined>(undefined);
-    const [selectedVaultDetails, setSelectedVaultDetails] = React.useState<Hex | undefined>(undefined);
+    const [vaultForChain, setVaultForChain] = React.useState<Hex | undefined>(undefined);
 
     const value = {
         networkType,
         setNetworkType,
         wrongNetwork,
         setWrongNetwork,
-        allVaultsForChain,
-        setAllVaultsForChain,
-        selectedVaultDetails,
-        setSelectedVaultDetails,
+        vaultForChain,
+        setVaultForChain,
     };
 
     return <NetworkContext.Provider value={value}>{children}</NetworkContext.Provider>;

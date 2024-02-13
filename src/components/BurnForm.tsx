@@ -5,26 +5,20 @@ import { useAccount } from 'wagmi';
 import toast, { LoaderIcon } from 'react-hot-toast';
 import { AmountInput } from './AmountInput';
 
-export const FormComponent = ({
-    title,
-    availableLabel,
+export const BurnForm = ({
     onSubmit,
     maxAmount,
     setAmount,
     isError,
     isLoading,
     isSuccess,
-    btnLabel,
 }: {
-    title: string;
-    availableLabel: string;
     onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
     maxAmount: bigint | undefined;
     setAmount: React.Dispatch<React.SetStateAction<bigint>>;
     isError: boolean;
     isLoading: boolean;
     isSuccess: boolean;
-    btnLabel: string;
 }) => {
     const { wrongNetwork } = useNetworkAndVaultContext();
     const { isConnected } = useAccount();
@@ -36,8 +30,8 @@ export const FormComponent = ({
     }, [isError]);
 
     return (
-        <div style={{ padding: '1rem', border: '1px' }}>
-            <h2>{title}</h2>
+        <div style={{ padding: '1rem', border: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h2>Burn osETH</h2>
             <form
                 onSubmit={(e) => {
                     onSubmit(e);
@@ -45,10 +39,10 @@ export const FormComponent = ({
                 style={{ width: '450px', margin: '1rem auto' }}
             >
                 <AmountInput
-                    setAmount={setAmount}
-                    isSuccess={isSuccess}
                     disabled={!isConnected || isLoading || wrongNetwork}
                     title={!isConnected ? 'Connect wallet' : 'Enter the amount to stake'}
+                    isSuccess={isSuccess}
+                    setAmount={setAmount}
                 />
                 <div
                     style={{
@@ -60,9 +54,9 @@ export const FormComponent = ({
                         marginBottom: '0.5rem',
                     }}
                 >
-                    <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>{availableLabel}:</div>
+                    <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>Available to burn:</div>
                     <div style={{ fontSize: '0.8rem', color: '#168F9C', fontWeight: 'bold' }}>
-                        {maxAmount ? Number(formatEther(maxAmount)).toLocaleString('US-EN') : '0'} ETH
+                        {maxAmount ? formatEther(maxAmount) : '0'} ETH
                     </div>
                 </div>
                 <button disabled={!isConnected || isLoading || wrongNetwork} type="submit">
@@ -79,10 +73,10 @@ export const FormComponent = ({
                                 <span>Waiting for confirmation</span>
                             </div>
                         ) : (
-                            btnLabel
+                            'Burn osETH'
                         )
                     ) : (
-                        'Connect wallet to stake'
+                        'Connect wallet to burn osETH'
                     )}
                 </button>
             </form>

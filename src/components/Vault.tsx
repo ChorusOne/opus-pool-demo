@@ -1,12 +1,13 @@
 import { useAccount } from 'wagmi';
 import { formatEther } from 'viem';
-import { useVaultDetails } from '../hooks/useVaultDetails';
+import { VaultData, useVaultDetails } from '../hooks/useVaultDetails';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
-import { VaultDetails } from '@chorus-one/opus-pool';
+import { HealthData, useHealthQuery } from '../hooks/useHealthQuery';
+import { OsTokenPositionHealth } from '@chorus-one/opus-pool';
 
 export const VaultDetailsComponent = () => {
     const { address } = useAccount();
-    const { selectedVaultDetails, networkType } = useNetworkAndVaultContext();
+    const { vaultForChain, networkType } = useNetworkAndVaultContext();
 
     const {
         data: vaultData,
@@ -14,52 +15,90 @@ export const VaultDetailsComponent = () => {
         isLoading,
     } = useVaultDetails({
         address,
-        vault: selectedVaultDetails,
+        vault: vaultForChain,
         network: networkType,
+    });
+    const { data: healthData } = useHealthQuery({
+        userAddress: address,
+        vaultAddress: vaultForChain,
+        amountToMint: vaultData?.maxMint,
+        network: networkType,
+        vaultData,
     });
 
     return (
         <div
             style={{
-                padding: '1rem',
+                paddingTop: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'start',
             }}
         >
-            <h2>Vault details</h2>
             {isLoading ? <div>Loading...</div> : null}
-            {vaultData ? <Vault vaultData={vaultData} /> : null}
+            <div style={{ display: 'flex', flexDirection: 'row', gap: '3rem' }}>
+                {vaultData ? <Vault vault={vaultData} /> : null}
+                {vaultData ? <UserData vault={vaultData} healthData={healthData} /> : null}
+            </div>
             {isError ? <div>We couldn't get vault details</div> : null}
         </div>
     );
 };
 
-const Vault = ({ vaultData }: { vaultData: VaultDetails[] }) => {
+const Vault = ({ vault }: { vault: VaultData }) => {
     return (
-        <table
+        <div
             style={{
                 fontFamily: 'sans-serif',
-                width: '100%',
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                justifyItems: 'start',
+                gap: '1rem',
+                border: '1px solid lightGrey',
+                borderRadius: '10px',
+                padding: '1rem',
             }}
         >
-            <thead>
-                <tr>
-                    <th style={{ width: '15%' }}>Vault name</th>
-                    <th style={{ width: '40%' }}>Description</th>
-                    <th style={{ width: '10%' }}>APY</th>
-                    <th style={{ width: '15%' }}>TVL</th>
-                    <th style={{ width: '15%' }}>Current balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                {vaultData.map((vault: VaultDetails) => (
-                    <tr key={vault.name}>
-                        <td style={{ width: '15%' }}>{vault.name}</td>
-                        <td style={{ width: '40%' }}>{vault.description}</td>
-                        <td style={{ width: '10%' }}>{vault.apy * 100} %</td>
-                        <td style={{ width: '15%' }}>{Number(formatEther(vault.tvl)).toLocaleString()} ETH</td>
-                        <td style={{ width: '15%' }}>{Number(formatEther(vault.balance)).toLocaleString()} ETH</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+            <strong>Vault name</strong>
+            <div>{vault.name}</div>
+            <strong>Address</strong>
+            <div>{vault.address}</div>
+            <strong>Description</strong>
+            <div>{vault.description}</div>
+            <strong>APY</strong>
+            <div>{Number(vault.apr).toLocaleString('US-EN')} %</div>
+
+            <strong>TVL</strong>
+            <div>{Number(vault.tvl).toLocaleString()} ETH</div>
+
+            <strong>Current balance</strong>
+            <div>{Number(formatEther(vault.stake.assets)).toLocaleString()} ETH</div>
+        </div>
+    );
+};
+
+const UserData = ({ vault, healthData }: { vault: VaultData; healthData: HealthData | undefined }) => {
+    return (
+        <div
+            style={{
+                fontFamily: 'sans-serif',
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                justifyItems: 'start',
+                gap: '1rem',
+                border: '1px solid lightGrey',
+                borderRadius: '10px',
+                padding: '1rem',
+            }}
+        >
+            <strong>Total staked</strong>
+            <div>{Number(formatEther(vault.stake.assets)).toLocaleString('US-EN')} ETH</div>
+            <strong>Minted</strong>
+            <div>{Number(formatEther(vault.minted)).toLocaleString('US-EN')} osETH</div>
+            <strong>Vault health</strong>
+            <div>{healthData ? OsTokenPositionHealth[healthData.initialHealth] : '-'}</div>
+            <strong>Max unstake amount</strong>
+            <div>{Number(formatEther(vault.maxWithdraw)).toLocaleString('US-EN')} osETH</div>
+        </div>
     );
 };

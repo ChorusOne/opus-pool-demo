@@ -1,13 +1,13 @@
 import { useMutation } from '@tanstack/react-query';
-import { Hex } from 'viem';
 import { useWalletClient } from 'wagmi';
-import { showSuccessToast } from '../components/SuccessToast';
 import toast from 'react-hot-toast';
+import { Hex } from 'viem';
+import { showSuccessToast } from '../components/SuccessToast';
 import { Networks, OpusPool } from '@chorus-one/opus-pool';
 
-export const useUnstakeMutation = () => {
+export const useMintMutation = () => {
     return useMutation({
-        mutationKey: ['unstake'],
+        mutationKey: ['mint'],
         mutationFn: ({
             userAddress,
             network,
@@ -20,8 +20,8 @@ export const useUnstakeMutation = () => {
             vault: Hex;
             amount: bigint;
             walletClient: ReturnType<typeof useWalletClient>['data'];
-        }) => unstake({ userAddress, network, vault, amount, walletClient }),
-        onSuccess: (data: Hex) => showSuccessToast(data, 'Unstake'),
+        }) => mint({ userAddress, network, vault, amount, walletClient }),
+        onSuccess: (data) => showSuccessToast(data, 'Mint'),
         onError: (error: unknown) => {
             let errorMessage: string;
             if (error instanceof Error) {
@@ -36,8 +36,7 @@ export const useUnstakeMutation = () => {
         },
     });
 };
-
-const unstake = async ({
+const mint = async ({
     userAddress,
     walletClient,
     network,
@@ -50,33 +49,32 @@ const unstake = async ({
     vault: Hex;
     amount: bigint;
 }): Promise<Hex> => {
-    const pool = new OpusPool({ network, address: userAddress });
-    const stakeRes = await pool.buildUnstakeTransaction({
-        vault,
-        amount,
+    const pool = new OpusPool({
+        network: network,
+        address: userAddress,
     });
-    const { transaction, gasEstimation, maxPriorityFeePerGas, maxFeePerGas } = stakeRes;
-
     if (!walletClient) throw new Error('Wallet client not found');
-
+    const mintTx = await pool.buildMintTransaction({
+        shares: amount,
+        vault,
+        referrer: vault,
+    });
     const hash = await walletClient.sendTransaction({
         account: userAddress,
         to: vault,
-        data: transaction,
+        data: mintTx.transaction,
         type: 'eip1559',
-        gas: gasEstimation,
-        maxPriorityFeePerGas,
-        maxFeePerGas,
+        gas: mintTx.gasEstimation,
+        maxPriorityFeePerGas: mintTx.maxPriorityFeePerGas,
+        maxFeePerGas: mintTx.maxFeePerGas,
     });
-    await pool.connector.eth
-        .waitForTransactionReceipt({ hash })
-        .then((receipt) => {
-            if (receipt.status === 'reverted') {
-                throw new Error(`Tx reverted`);
-            }
-        })
-        .catch((error) => {
-            throw new Error(error);
-        });
+
+    if (!hash) {
+        throw new Error('Something went wrong with the tx');
+    }
+    const receipt = await pool.connector.eth.waitForTransactionReceipt({ hash });
+    if (receipt.status === 'reverted') {
+        throw new Error('The transaction got reverted');
+    }
     return hash;
 };
