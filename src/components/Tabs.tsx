@@ -3,8 +3,8 @@ import { StakeComponent } from './Stake';
 import { RewardsComponent } from './Rewards';
 import { TransactionsComponent } from './Transactions';
 import { UnstakeComponent } from './Unstake';
-import { VaultDetailsComponent } from './Vault';
 import { MintComponent } from './Mint';
+import { BurnComponent } from './Burn';
 
 enum TabsEnum {
     Transactions = 'Transactions',
@@ -30,7 +30,13 @@ export const Tabs = () => {
                     className={`tab-header ${activeTab === TabsEnum.Mint ? 'active' : ''}`}
                     onClick={() => setActiveTab(TabsEnum.Mint)}
                 >
-                    Mint
+                    Mint osETH
+                </div>
+                <div
+                    className={`tab-header ${activeTab === TabsEnum.Burn ? 'active' : ''}`}
+                    onClick={() => setActiveTab(TabsEnum.Burn)}
+                >
+                    Burn osETH
                 </div>
                 <div
                     className={`tab-header ${activeTab === TabsEnum.Unstake ? 'active' : ''}`}
@@ -52,26 +58,12 @@ export const Tabs = () => {
                 </div>
             </div>
             <div className="tab-content">
-                {activeTab === TabsEnum.Stake && (
-                    <>
-                        <VaultDetailsComponent />
-                        <StakeComponent />
-                    </>
-                )}
+                {activeTab === TabsEnum.Stake && <StakeComponent />}
                 {activeTab === TabsEnum.Rewards && <RewardsComponent />}
                 {activeTab === TabsEnum.Transactions && <TransactionsComponent />}
-                {activeTab === TabsEnum.Unstake && (
-                    <>
-                        <VaultDetailsComponent />
-                        <UnstakeComponent />
-                    </>
-                )}
-                {activeTab === TabsEnum.Mint && (
-                    <>
-                        <VaultDetailsComponent />
-                        <MintComponent />
-                    </>
-                )}
+                {activeTab === TabsEnum.Unstake && <UnstakeComponent />}
+                {activeTab === TabsEnum.Mint && <MintComponent />}
+                {activeTab === TabsEnum.Burn && <BurnComponent />}
             </div>
         </div>
     );

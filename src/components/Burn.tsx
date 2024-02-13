@@ -4,11 +4,10 @@ import { useState } from 'react';
 import { parseEther } from 'viem';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
 import { useVaultDetails } from '../hooks/useVaultDetails';
-import { useHealthQuery } from '../hooks/useHealthQuery';
-import { MintForm } from './MintForm';
-import { useMintMutation } from '../hooks/useMintMutation';
+import { BurnForm } from './BurnForm';
+import { useBurnMutation } from '../hooks/useBurnMutation';
 
-export const MintComponent = () => {
+export const BurnComponent = () => {
     const { address } = useAccount();
     const [amount, setAmount] = useState<bigint>(parseEther('0'));
     const { networkType, vaultForChain } = useNetworkAndVaultContext();
@@ -18,22 +17,14 @@ export const MintComponent = () => {
         vault: vaultForChain,
         address: address,
     });
-    const { mutate: mint, isError, isLoading, isSuccess } = useMintMutation();
+    const { mutate: burn, isError, isLoading, isSuccess } = useBurnMutation();
 
     const { data: walletClient } = useWalletClient();
 
-    const { data: healthForVault } = useHealthQuery({
-        userAddress: address,
-        vaultAddress: vaultForChain,
-        amountToMint: amount,
-        network: networkType,
-        vaultData: vaultDetails,
-    });
-
-    const handleMint = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleBurn = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!address || !vaultForChain) return;
-        mint({
+        burn({
             userAddress: address,
             network: networkType,
             vault: vaultForChain,
@@ -45,14 +36,13 @@ export const MintComponent = () => {
 
     return (
         <>
-            <MintForm
-                onSubmit={(e) => handleMint(e)}
-                maxAmount={vaultDetails?.maxMint}
+            <BurnForm
+                onSubmit={(e) => handleBurn(e)}
+                maxAmount={vaultDetails?.minted}
                 setAmount={setAmount}
                 isError={isError}
                 isLoading={isLoading}
                 isSuccess={isSuccess}
-                healthForVault={healthForVault}
             />
         </>
     );

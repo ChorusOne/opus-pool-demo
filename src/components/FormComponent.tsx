@@ -1,9 +1,9 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
-import { formatEther, parseEther } from 'viem';
+import React, { useEffect } from 'react';
+import { formatEther } from 'viem';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
-import { number } from 'yup';
 import { useAccount } from 'wagmi';
 import toast, { LoaderIcon } from 'react-hot-toast';
+import { AmountInput } from './AmountInput';
 
 export const FormComponent = ({
     title,
@@ -26,7 +26,6 @@ export const FormComponent = ({
     isSuccess: boolean;
     btnLabel: string;
 }) => {
-    const [inputValue, setInputValue] = useState<string>('');
     const { wrongNetwork } = useNetworkAndVaultContext();
     const { isConnected } = useAccount();
 
@@ -35,35 +34,6 @@ export const FormComponent = ({
             toast.error('Something went wrong');
         }
     }, [isError]);
-    useEffect(() => {
-        if (isSuccess) {
-            setInputValue('');
-        }
-    }, [isSuccess]);
-
-    const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const regex = /^\d*(\.\d{0,18})?$/; // only allow 18 digits after the decimal
-        const stringValue = e.target.value.replaceAll('+', '').replaceAll('-', '');
-        let isValid = false;
-        let validValue: bigint | undefined;
-        if (stringValue !== '' && !regex.test(stringValue)) {
-            return;
-        }
-        try {
-            if (stringValue === '') {
-                validValue = undefined;
-            } else {
-                number().validateSync(stringValue);
-                validValue = parseEther(stringValue);
-                setAmount(validValue);
-            }
-            isValid = true;
-        } catch (_error) {
-            // Swallow parsing errors, just don't update the value
-        }
-        if (!isValid) return;
-        setInputValue(stringValue);
-    };
 
     return (
         <div style={{ padding: '1rem', border: '1px' }}>
@@ -74,31 +44,12 @@ export const FormComponent = ({
                 }}
                 style={{ width: '450px', margin: '1rem auto' }}
             >
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        border: '1px solid #168F9C',
-                        borderRadius: '0.5rem',
-                        padding: '0.5rem',
-                    }}
-                >
-                    <input
-                        style={{
-                            border: 'none',
-                            width: '100%',
-                            outline: 'none',
-                        }}
-                        type="text"
-                        placeholder="ETH amount"
-                        onChange={onChange}
-                        value={inputValue}
-                        disabled={!isConnected || isLoading || wrongNetwork}
-                        title={!isConnected ? 'Connect wallet' : 'Enter the amount to stake'}
-                    />
-                    <span>ETH</span>
-                </div>
+                <AmountInput
+                    setAmount={setAmount}
+                    isSuccess={isSuccess}
+                    disabled={!isConnected || isLoading || wrongNetwork}
+                    title={!isConnected ? 'Connect wallet' : 'Enter the amount to stake'}
+                />
                 <div
                     style={{
                         width: '100%',
@@ -114,7 +65,7 @@ export const FormComponent = ({
                         {maxAmount ? Number(formatEther(maxAmount)).toLocaleString('US-EN') : '0'} ETH
                     </div>
                 </div>
-                <button disabled={!isConnected || isLoading || !inputValue || wrongNetwork} type="submit">
+                <button disabled={!isConnected || isLoading || wrongNetwork} type="submit">
                     {isConnected ? (
                         isLoading ? (
                             <div

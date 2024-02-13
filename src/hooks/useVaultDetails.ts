@@ -26,25 +26,15 @@ export const useVaultDetails = ({
     vault: Hex | undefined;
     address: Hex | undefined;
 }) => {
+    const enabled = !!address && !!network && !!vault;
     return useQuery({
         queryKey: ['vaultDetails', vault],
-        queryFn: () => getVaultDetails({ address, network, vault }),
-        enabled: !!address && !!network && !!vault,
+        queryFn: () => getVaultDetails({ address: address!, network, vault: vault! }),
+        enabled,
     });
 };
 
-const getVaultDetails = async ({
-    address,
-    network,
-    vault,
-}: {
-    address: Hex | undefined;
-    network: Networks;
-    vault: Hex | undefined;
-}) => {
-    if (!address || !network || !vault) {
-        return undefined;
-    }
+const getVaultDetails = async ({ address, network, vault }: { address: Hex; network: Networks; vault: Hex }) => {
     const pool = new OpusPool({
         address,
         network,

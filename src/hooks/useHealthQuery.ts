@@ -13,21 +13,20 @@ export const useHealthQuery = ({
     vaultAddress,
     amountToMint,
     vaultData,
-    enabled,
     network,
 }: {
     userAddress: Hex | undefined;
     vaultAddress: Hex | undefined;
     amountToMint?: bigint;
     vaultData: VaultData | undefined;
-    enabled: boolean;
     network: Networks;
 }) => {
+    const enabled = !!vaultData && !!amountToMint;
     return useQuery<HealthData, unknown, HealthData, QueryKey>({
         // @ts-expect-error: a known issue with queryKey typing
         queryKey: ['health', userAddress, vaultAddress, amountToMint?.toString()],
         queryFn: () => getHealth({ amountToMint: amountToMint!, vaultData, userAddress, vaultAddress, network }),
-        enabled: !!vaultData && !!amountToMint && enabled,
+        enabled,
         refetchOnWindowFocus: false,
     });
 };

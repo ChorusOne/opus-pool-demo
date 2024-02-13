@@ -3,17 +3,15 @@ import { formatEther } from 'viem';
 import { useNetworkAndVaultContext } from '../context/neworkAndVaultContext';
 import { useAccount } from 'wagmi';
 import toast, { LoaderIcon } from 'react-hot-toast';
-import { OsTokenPositionHealth } from '@chorus-one/opus-pool';
 import { AmountInput } from './AmountInput';
 
-export const MintForm = ({
+export const BurnForm = ({
     onSubmit,
     maxAmount,
     setAmount,
     isError,
     isLoading,
     isSuccess,
-    healthForVault,
 }: {
     onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
     maxAmount: bigint | undefined;
@@ -21,12 +19,6 @@ export const MintForm = ({
     isError: boolean;
     isLoading: boolean;
     isSuccess: boolean;
-    healthForVault:
-        | {
-              initialHealth: OsTokenPositionHealth;
-              updatedHealth: OsTokenPositionHealth;
-          }
-        | undefined;
 }) => {
     const { wrongNetwork } = useNetworkAndVaultContext();
     const { isConnected } = useAccount();
@@ -38,23 +30,8 @@ export const MintForm = ({
     }, [isError]);
 
     return (
-        <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h2>Mint osETH</h2>
-            <h3>Position health:</h3>
-            <div
-                style={{
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    gap: '20px',
-                    border: '1px solid lightGrey',
-                    borderRadius: '10px',
-                    padding: '10px',
-                }}
-            >
-                <span>{healthForVault ? healthForVault?.initialHealth : '-'}</span>
-                <span className="mx-2">&rarr;</span>
-                <span>{healthForVault ? healthForVault?.updatedHealth : '-'}</span>
-            </div>
+        <div style={{ padding: '1rem', border: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h2>Burn osETH</h2>
             <form
                 onSubmit={(e) => {
                     onSubmit(e);
@@ -62,9 +39,9 @@ export const MintForm = ({
                 style={{ width: '450px', margin: '1rem auto' }}
             >
                 <AmountInput
-                    isSuccess={isSuccess}
                     disabled={!isConnected || isLoading || wrongNetwork}
                     title={!isConnected ? 'Connect wallet' : 'Enter the amount to stake'}
+                    isSuccess={isSuccess}
                     setAmount={setAmount}
                 />
                 <div
@@ -77,21 +54,12 @@ export const MintForm = ({
                         marginBottom: '0.5rem',
                     }}
                 >
-                    <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>Available to mint:</div>
+                    <div style={{ fontSize: '0.8rem', color: '#168F9C' }}>Available to burn:</div>
                     <div style={{ fontSize: '0.8rem', color: '#168F9C', fontWeight: 'bold' }}>
-                        {maxAmount ? Number(formatEther(maxAmount)).toLocaleString('US-EN') : '0'} ETH
+                        {maxAmount ? formatEther(maxAmount) : '0'} ETH
                     </div>
                 </div>
-                <button
-                    disabled={
-                        !isConnected ||
-                        isLoading ||
-                        wrongNetwork ||
-                        healthForVault?.initialHealth !== OsTokenPositionHealth.Healthy ||
-                        healthForVault?.updatedHealth !== OsTokenPositionHealth.Healthy
-                    }
-                    type="submit"
-                >
+                <button disabled={!isConnected || isLoading || wrongNetwork} type="submit">
                     {isConnected ? (
                         isLoading ? (
                             <div
@@ -105,10 +73,10 @@ export const MintForm = ({
                                 <span>Waiting for confirmation</span>
                             </div>
                         ) : (
-                            'Mint osETH'
+                            'Burn osETH'
                         )
                     ) : (
-                        'Connect wallet to stake'
+                        'Connect wallet to burn osETH'
                     )}
                 </button>
             </form>
